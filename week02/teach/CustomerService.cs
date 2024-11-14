@@ -7,26 +7,59 @@ public class CustomerService {
         // Example code to see what's in the customer service queue:
         // var cs = new CustomerService(10);
         // Console.WriteLine(cs);
-
+        var service = new CustomerService(3);
         // Test Cases
-
+/*
         // Test 1
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: Add and serve one customer
+        // Expected Result: Show the customer that was added
         Console.WriteLine("Test 1");
-
-        // Defect(s) Found: 
+        var service = new CustomerService(3);
+        service.AddNewCustomer();
+        service.ServeCustomer();
+        // Defect(s) Found: Was deleting before getting the details 
 
         Console.WriteLine("=================");
 
         // Test 2
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: Add two customers and serve them in the correct order
+        // Expected Result: show customers in correct order. 
         Console.WriteLine("Test 2");
-
-        // Defect(s) Found: 
+        service = new CustomerService(3);
+        service.AddNewCustomer();
+        service.AddNewCustomer();
+        Console.WriteLine($"Before serving customers: {service}");
+        service.ServeCustomer();
+        service.ServeCustomer();
+        Console.WriteLine($"After serving customers: {service}");
+        // Defect(s) Found: n/a
 
         Console.WriteLine("=================");
+
+        // Test 3
+        // Scenario: Serving a customer when there is none.
+        // Expected Result: Display error message
+        Console.WriteLine("Test 3");
+        service = new CustomerService(3);
+        service.ServeCustomer();
+        // Defect(s) Found: Check queue length
+
+        Console.WriteLine("=================");
+*/
+        // Test 4
+        // Scenario: Does the max queue work
+        // Expected Result: Display error message
+        Console.WriteLine("Test 4");
+        service = new CustomerService(3);
+        service.AddNewCustomer();
+        service.AddNewCustomer();
+        service.AddNewCustomer();
+        service.AddNewCustomer();
+        Console.WriteLine($"Service Queue: {service}");       
+        // Defect(s) Found: check logic in AddNewCustomer >= 
+
+        Console.WriteLine("=================");
+
 
         // Add more Test Cases As Needed Below
     }
@@ -67,7 +100,7 @@ public class CustomerService {
     /// </summary>
     private void AddNewCustomer() {
         // Verify there is room in the service queue
-        if (_queue.Count > _maxSize) {
+        if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
         }
@@ -88,8 +121,12 @@ public class CustomerService {
     /// Dequeue the next customer and display the information.
     /// </summary>
     private void ServeCustomer() {
-        _queue.RemoveAt(0);
+        if (_queue.Count <=0 )
+        {
+            Console.WriteLine("No one in the queue");
+        }
         var customer = _queue[0];
+        _queue.RemoveAt(0);
         Console.WriteLine(customer);
     }
 

@@ -54,6 +54,7 @@ public class PriorityQueueTests
     [TestMethod]
     // Scenario: Enqueue items with equal priority and test the order.
     // Expected Result: Items should be dequeued in the order they were enqueued.
+    // Defect: if multiple items have the same highest priority, the current code doesn't guarantee they will be dequeued in the order they were added.
     public void TestPriorityQueue_Dequeue_FIFOForEqualPriority()
     {
         var pq = new PriorityQueue();

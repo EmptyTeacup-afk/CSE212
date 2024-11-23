@@ -22,7 +22,21 @@ public static class SetsAndMaps
     public static string[] FindPairs(string[] words)
     {
         // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        var wordSet = new HashSet<string>();
+        var pairs = new List<string>();
+
+        foreach (var word in words)
+        {
+            var reversedWord = new string(word.Reverse().ToArray());
+            if (wordSet.Contains(reversedWord))
+            {
+                pairs.Add($"{word} & {reversedWord}");
+            }
+            
+            wordSet.Add(word);
+        }
+
+        return pairs.ToArray();;
     }
 
     /// <summary>
@@ -39,11 +53,22 @@ public static class SetsAndMaps
     public static Dictionary<string, int> SummarizeDegrees(string filename)
     {
         var degrees = new Dictionary<string, int>();
-        foreach (var line in File.ReadLines(filename))
+
+    foreach (var line in File.ReadLines(filename))
+    {
+        var fields = line.Split(",");
+        var degree = fields[3];
+
+        if (degrees.ContainsKey(degree))
         {
-            var fields = line.Split(",");
-            // TODO Problem 2 - ADD YOUR CODE HERE
+            degrees[degree]++;
+
         }
+        else
+        {
+            degrees[degree] = 1;
+        }
+    }
 
         return degrees;
     }
@@ -66,8 +91,35 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+    
+        // Normalize the input by removing spaces and converting to lowercase.
+        string normalizedWord1 = new string(word1.Where(char.IsLetter).Select(char.ToLower).ToArray());
+        string normalizedWord2 = new string(word2.Where(char.IsLetter).Select(char.ToLower).ToArray());
+    
+        // If the lengths differ, they can't be anagrams.
+        if (normalizedWord1.Length != normalizedWord2.Length)
+        {
+            return false;
+        }
+    
+        var charCount = new Dictionary<char, int>();
+    
+        // Count characters in the first word.
+        foreach (char c in normalizedWord1)
+        {
+            charCount[c] = charCount.GetValueOrDefault(c, 0) + 1;
+        }
+    
+        // Check characters in the second word.
+        foreach (char c in normalizedWord2)
+        {
+            if (!charCount.ContainsKey(c) || --charCount[c] < 0)
+            {
+                return false;
+            }
+        }
+    
+        return true;
     }
 
     /// <summary>
@@ -87,20 +139,28 @@ public static class SetsAndMaps
     public static string[] EarthquakeDailySummary()
     {
         const string uri = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+
         using var client = new HttpClient();
-        using var getRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-        using var jsonStream = client.Send(getRequestMessage).Content.ReadAsStream();
-        using var reader = new StreamReader(jsonStream);
-        var json = reader.ReadToEnd();
+        var json = client.GetStringAsync(uri).Result; // Fetch JSON data as a string
+
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
+        // Deserialize the JSON into a FeatureCollection object
         var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
 
-        // TODO Problem 5:
-        // 1. Add code in FeatureCollection.cs to describe the JSON using classes and properties 
-        // on those classes so that the call to Deserialize above works properly.
-        // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
-        // 3. Return an array of these string descriptions.
-        return [];
+        // Validate that the deserialization was successful and features are not null
+        if (featureCollection == null || featureCollection.Features == null)
+        {
+            return Array.Empty<string>();
+        }
+
+        // Process the features, filter invalid entries, and format the output
+        // LINQ query
+        var result = featureCollection.Features
+            .Where(f => f.Properties?.Place != null && f.Properties.Mag.HasValue) // .Where - filters the list on condition(s) | ?. - null-conditional operator
+            .Select(f => $"{f.Properties.Place} - Mag {f.Properties.Mag.Value}") // Format strings | f =>  Defines how each feature f will be transformed into a string
+            .ToArray(); // Convert to an array
+
+        return result; // Return the formatted result
     }
 }
